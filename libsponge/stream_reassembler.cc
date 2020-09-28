@@ -13,7 +13,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity):
-       	_aux(capacity), _output(capacity), _capacity(capacity), _start_unread(0) {}
+  _aux(capacity), _output(capacity), _capacity(capacity), _idx_unread(0), _empty(0) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -31,14 +31,26 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 	read_from_aux();
 		
 }
-
+// Writes data into the auxiliary storage object
 void StreamReassembler::write_to_aux(const string &data, const size_t index, const bool eof){
+  //Index for the start of unacceptable bytes
+  size_t idx_unacc = _idx_unread + _capacity;
+  //Last index of data
+  size_t idx_last = index + data.size() - 1;
+  if (index > idx_unacc || idx_last < _idx_unread){
+    return;
+  }
+  
+  
+
   cout<<data[0]<<endl;
   cout<<index<<endl;
   cout<<eof<<endl;
 }
 
+// Reads from auxiiary storage in a suitable format and writes to bytestream
 void StreamReassembler::read_from_aux(){
+
 }
 
 size_t StreamReassembler::unassembled_bytes() const { return {}; }
