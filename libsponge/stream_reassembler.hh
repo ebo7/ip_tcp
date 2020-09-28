@@ -13,7 +13,7 @@ using namespace std;
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-    string _aux; // Auxiliary object to store assembled and unassembled bytes 
+    vector<char> _aux; // Auxiliary object to store assembled and unassembled bytes 
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
     size_t _start_unread; // Index for the start of unread bytes
@@ -33,7 +33,9 @@ class StreamReassembler {
     //! \param index indicates the index (place in sequence) of the first byte in `data`
     //! \param eof the last byte of `data` will be the last byte in the entire stream
     void push_substring(const std::string &data, const uint64_t index, const bool eof);
-
+    
+    void write_to_aux(const std::string &data, const uint64_t index, const bool eof );
+    void read_from_aux();
     //! \name Access the reassembled byte stream
     //!@{
     const ByteStream &stream_out() const { return _output; }
