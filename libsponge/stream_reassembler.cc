@@ -14,7 +14,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity):
-  _aux(capacity), _output(capacity), _capacity(capacity), _start_aux(0), _empty(capacity, true) {}
+  _aux(""), _output(capacity), _capacity(capacity), _start_aux(0), _empty(capacity, true) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -48,15 +48,16 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
   size_t end_copy = min(end_aux, end_data);
   //Size of data to copy
   size_t size = end_copy - start_copy;
-  //Index inside data to start copying
-  size_t start = start_copy - start_data;
-  for (size_t i=0; i<start+size; i++){
-    
-  }
+  //Location inside data to start copying
+  size_t loc_data = start_copy - start_data;
+    //Location inside aux to start copying
+    size_t loc_aux = (start_copy) % _capacity;
 
-  cout<<data[0]<<endl;
-  //cout<<index<<endl;
-  cout<<eof<<endl;
+    _aux.substr(loc_aux, size) = data.substr(loc_data, size);
+    for (size_t i=loc_aux; i<loc_aux + size; i++){
+      _empty[i] = false;
+    }
+    cout<<eof<<endl;
 }
 
 // Reads from auxiiary storage in a suitable format and writes to bytestream

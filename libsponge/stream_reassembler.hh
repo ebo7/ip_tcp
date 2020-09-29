@@ -13,7 +13,7 @@ using namespace std;
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-    vector<char> _aux; // Auxiliary object to store assembled and unassembled bytes 
+    string _aux; // Auxiliary object to store assembled and unassembled bytes 
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
     size_t _start_aux; // Index for the start of unread bytes
