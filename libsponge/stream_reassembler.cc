@@ -15,13 +15,17 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity)
-    : _aux(""), _output(capacity), _capacity(capacity), _start_aux(0), _empty(capacity, true), _bytes_unass(0) {}
+    : _aux(""), _output(capacity), _capacity(capacity), _start_aux(0), _empty(capacity, true), _bytes_unass(0) {
+  for (size_t i=0; i<capacity; i++ ){
+    _aux.append(" ");
+  }
+}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
-  cout << "Index: " << index << " data size: " << data.size() << " data: " <<data <<" EOF: " << eof << endl;
+  cout << "Index: " << index << " data size: " << data.size() <<" EOF: " << eof << endl;
   write_to_aux(data, index, eof);
     //write_to_bytestream();
 }
@@ -64,7 +68,7 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
     _aux.replace(loc_aux, size, data.substr(loc_data, size));
     _bytes_unass += size;
     fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
-    cout << "AUX: " << _aux << endl;
+    //cout << "AUX: " << _aux << endl;
     write_to_bytestream();
     //Bytestream ended
     if (eof && (_start_aux  == end_data) ) {
