@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 // Dummy implementation of a stream reassembler.
 
 // For Lab 1, please replace with a real implementation that passes the
@@ -63,20 +64,23 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
     size_t loc_data = start_copy - start_data;
     // Location inside aux to start copying
     size_t loc_aux = (start_copy) % _capacity;
+    // Check how many empty spaces to fill
+    size_t count_empty = accumulate(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, 0);
     cout<< "DATA: "<< data.substr(loc_data, size) <<endl;
     //cout << _aux.size() << endl;
     cout << "B4 AUX: " << _aux.substr(0, 10) << endl;
     _aux.replace(loc_aux, size, data.substr(loc_data, size));
     cout << "AFT AUX: " << _aux.substr(0, 10) << endl;
-    _bytes_unass += size;
+    _bytes_unass += count_empty;
+    cout<< "----------1st unass: "<<_bytes_unass<<endl;
     fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
     //cout << "AUX: " << _aux << endl;
     write_to_bytestream();
-    //Bytestream just finished
+ 
     if (eof) {
       _end_stream = end_data;
-      
     }
+    //Last byte could have been stitched previously, end_input without eof if necessary
     if (_start_aux == _end_stream ) {
         cout<<"----------2nd EOF" <<endl;
         _output.end_input();
@@ -93,12 +97,23 @@ void StreamReassembler::write_to_bytestream() {
     auto it_start = _empty.begin() + (_start_aux % _capacity);
     auto it_end = find(it_start, _empty.end(), true);
     size_t size = it_end - it_start;
-    size_t num_wrote = _output.write(_aux.substr(start, size));
+    size_t num_wrote = 0;
+    /*There were 2 options to write to bytestream. One is to write to aux simulatenously if previous write to bytestream
+     *wasn't complete. Second is to wait until all assembled bytes are written to the bytesteam. Here is 
+     *the second one, which seemed cleaner.
+     */
+    while (true){
+      num_wrote += _output.write(_aux.substr(start + num_wrote, size - num_wrote));
+      if (num_wrote == size){
+	break;
+      }
+    }
     cout<<"NUM BYTES WRITTEN: "<<num_wrote<<endl;
     // Mark sent bytes as empty
     fill(it_start, it_start + num_wrote, true);
     _start_aux += num_wrote;
     _bytes_unass -= num_wrote;
+    cout<<"---------2nd unass: " << _bytes_unass <<endl;
     cout<<"2nd START_AUX: " << _start_aux<<endl;
 
 }
