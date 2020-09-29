@@ -18,9 +18,8 @@ class StreamReassembler {
     size_t _capacity;     //!< The maximum number of bytes
     size_t _start_aux;    // Index for the start of unread bytes
     vector<bool> _empty;  // Vector for denoting empty vs non-empty idxs in aux
-    size_t _bytes_unass;  // Unassembled bytes
+    size_t _bytes_unass;  // Count of unassembled bytes
     size_t _end_stream;   // Last byte of the stream
-    //_aux.reserve(capacity);
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,

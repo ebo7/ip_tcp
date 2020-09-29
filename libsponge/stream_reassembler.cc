@@ -25,8 +25,13 @@ StreamReassembler::StreamReassembler(const size_t capacity)
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
     write_to_aux(data, index, eof);
-}
+    write_to_bytestream();
 
+    // Last byte could have been stitched previously, end_input without eof if necessary                                           
+    if (_start_aux == _end_stream) {
+        _output.end_input();
+    }
+}
 // Write data into the auxiliary storage object
 void StreamReassembler::write_to_aux(const string &data, const size_t start_data, const bool eof) {
     if (data.size() == 0) {
@@ -66,14 +71,10 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
     _aux.replace(loc_aux, size, data.substr(loc_data, size));
     _bytes_unass += count_empty;
     fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
-    write_to_bytestream();
 
+    
     if (eof) {
         _end_stream = end_data;
-    }
-    // Last byte could have been stitched previously, end_input without eof if necessary
-    if (_start_aux == _end_stream) {
-        _output.end_input();
     }
 }
 
