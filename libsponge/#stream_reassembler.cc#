@@ -72,10 +72,8 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
     fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
     //cout << "AUX: " << _aux << endl;
     write_to_bytestream();
-    //Bytestream just finished
     if (eof) {
       _end_stream = end_data;
-      
     }
     if (_start_aux == _end_stream ) {
         cout<<"----------2nd EOF" <<endl;

@@ -14,11 +14,12 @@ class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
     string _aux;          // Auxiliary object to store assembled and unassembled bytes
-  ByteStream _output;   //!< The reassembled in-order byte stream
+    ByteStream _output;   //!< The reassembled in-order byte stream
     size_t _capacity;     //!< The maximum number of bytes
     size_t _start_aux;    // Index for the start of unread bytes
     vector<bool> _empty;  // Vector for denoting empty vs non-empty idxs in aux
     size_t _bytes_unass;  // Unassembled bytes
+  size_t _end_stream; //Last byte of the stream
   //_aux.reserve(capacity);
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
