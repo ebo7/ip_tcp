@@ -1,5 +1,6 @@
 #include "stream_reassembler.hh"
 #include <iostream>
+#include <algorithm>
 // Dummy implementation of a stream reassembler.
 
 // For Lab 1, please replace with a real implementation that passes the
@@ -13,7 +14,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity):
-  _aux(capacity), _output(capacity), _capacity(capacity), _idx_start_aux(0), _empty(capacity) {}
+  _aux(capacity), _output(capacity), _capacity(capacity), _start_aux(0), _empty(capacity, true) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -32,22 +33,26 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 		
 }
 // Writes data into the auxiliary storage object
-void StreamReassembler::write_to_aux(const string &data, const size_t idx_start_data, const bool eof){
+void StreamReassembler::write_to_aux(const string &data, const size_t start_data, const bool eof){
   //Index for the start of unacceptable bytes
-  size_t idx_end_aux = _idx_start_aux + _capacity;
-  cout<<idx_start_data<<endl;
-  cout<< idx_end_aux<<endl;
-  //Last index of data
-  //size_t idx_end = index + data.size() - 1;
+  size_t end_aux = _start_aux + _capacity;
+  size_t end_data = start_data + data.size()-1;
+  cout<<start_data<<endl;
+  cout<< end_aux<<endl;
+  if (start_data > end_aux || end_data < _start_aux){
+   return;
+  }
 
-  //if (index > idx_unacc || idx_last < _idx_unread){
-  // return;
-  //}
-
-  //Index of data in aux
-  //size_t idx_in_aux = index % _capacity;
-  
-  
+  //Index to start copying data
+  size_t start_copy = max(_start_aux, start_data);
+  size_t end_copy = min(end_aux, end_data);
+  //Size of data to copy
+  size_t size = end_copy - start_copy;
+  //Index inside data to start copying
+  size_t start = start_copy - start_data;
+  for (size_t i=0; i<start+size; i++){
+    
+  }
 
   cout<<data[0]<<endl;
   //cout<<index<<endl;
