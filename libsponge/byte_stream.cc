@@ -16,9 +16,9 @@ ByteStream::ByteStream(const size_t capacity) : cap(capacity), deq() {}
 size_t ByteStream::write(const string &data) {
     // size_t size_left = capacity - deq.size();
     // If data is empty, signal input ended
-    if (data.size() == 0) {
-        _end = true;
-    }
+    //if (data.size() == 0) {
+    //    _end = true;
+    //}
     // Data can be bigger than size_left
     size_t size = min(data.size(), remaining_capacity());
     bytes_wrote += size;
