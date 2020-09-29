@@ -21,26 +21,33 @@ StreamReassembler::StreamReassembler(const size_t capacity)
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
-    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-    cout << _aux.size() << endl;
-    cout << _capacity << endl;
-    cout << _aux[0] << endl;
-    // If eof, signal input is ended
-    if (eof) {
-        _output.end_input();
-    }
-    write_to_aux(data, index, eof);
-    write_to_bytestream();
+  cout << "Index: " << index << " data size: " << data.size() << " data: " <<data <<" EOF: " << eof << endl;
+  write_to_aux(data, index, eof);
+    //write_to_bytestream();
 }
 // Writes data into the auxiliary storage object
 void StreamReassembler::write_to_aux(const string &data, const size_t start_data, const bool eof) {
-    // Index for the start of unacceptable bytes
+   if (data.size() == 0){
+      //Bytestream ended
+      if (eof){
+	cout<<"----------1st EOF"<<endl;
+	_output.end_input();
+      }
+      cout<<"---------------------------------------------------------"<<endl;
+      return;
+      
+    }
+  // Index for the start of unacceptable bytes
     size_t end_aux = _start_aux + _capacity;
+    //Index data ends+1
     size_t end_data = start_data + data.size();
-    cout << start_data << endl;
-    cout << end_aux << endl;
+    //cout << "Index: " << start_data << " data: " << data << " EOF: " << eof << endl;
+    cout<<"1st START_AUX: " <<_start_aux<<endl;
+    cout <<"end data:" <<end_data<<endl;
     if (start_data > end_aux || end_data < _start_aux) {
-        return;
+      cout<<"INVAL"<<endl;
+      cout<<"----------------------------------------------------------"<<endl;
+      return;
     }
 
     // Index to start copying data
@@ -52,16 +59,19 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
     size_t loc_data = start_copy - start_data;
     // Location inside aux to start copying
     size_t loc_aux = (start_copy) % _capacity;
-
+    cout<< "DATA: "<< data.substr(loc_data, size) <<endl;
+    cout << _aux.size() << endl;
     _aux.replace(loc_aux, size, data.substr(loc_data, size));
     _bytes_unass += size;
     fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
-    cout << "empty0" << endl;
-    cout << _empty[0] << endl;
-    cout << _empty[1] << endl;
-    cout << eof << endl;
     cout << "AUX: " << _aux << endl;
-    cout << "data: " << data.substr(loc_data, size) << endl;
+    write_to_bytestream();
+    //Bytestream ended
+    if (eof && (_start_aux  == end_data) ) {
+      cout<<"----------2nd EOF" <<endl;
+      _output.end_input();
+    }
+    cout<<"----------------------------------------------------------"<<endl;
 }
 
 // Reads from auxiiary storage in a suitable format and writes to bytestream
@@ -72,13 +82,14 @@ void StreamReassembler::write_to_bytestream() {
     auto it_start = _empty.begin() + (_start_aux % _capacity);
     auto it_end = find(it_start, _empty.end(), true);
     size_t size = it_end - it_start;
-    cout << "MMMMMMMMMMMMMMMMMMMMMM" << endl;
-    cout << size << endl;
     size_t num_wrote = _output.write(_aux.substr(start, size));
+    cout<<"NUM BYTES WRITTEN: "<<num_wrote<<endl;
     // Mark sent bytes as empty
     fill(it_start, it_start + num_wrote, true);
     _start_aux += num_wrote;
     _bytes_unass -= num_wrote;
+    cout<<"2nd START_AUX: " << _start_aux<<endl;
+
 }
 
 size_t StreamReassembler::unassembled_bytes() const { return _bytes_unass; }
