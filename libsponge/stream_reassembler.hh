@@ -19,8 +19,8 @@ class StreamReassembler {
     size_t _start_aux;    // Index for the start of unread bytes
     vector<bool> _empty;  // Vector for denoting empty vs non-empty idxs in aux
     size_t _bytes_unass;  // Unassembled bytes
-  size_t _end_stream; //Last byte of the stream
-  //_aux.reserve(capacity);
+    size_t _end_stream;   // Last byte of the stream
+    //_aux.reserve(capacity);
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
@@ -37,7 +37,7 @@ class StreamReassembler {
     //! \param eof the last byte of `data` will be the last byte in the entire stream
     void push_substring(const std::string &data, const uint64_t index, const bool eof);
 
-  void write_to_aux(const std::string &data, const uint64_t index, const bool eof);
+    void write_to_aux(const std::string &data, const uint64_t index, const bool eof);
     void write_to_bytestream();
     //! \name Access the reassembled byte stream
     //!@{
