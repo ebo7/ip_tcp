@@ -112,9 +112,9 @@ void StreamReassembler::write_to_bytestream() {
     cout << start << endl;
     cout << size <<endl;
     
-    // while (true){
-      //cont++;
-      num_wrote += _output.write(_aux.substr(start + num_wrote, size - num_wrote));
+    //Waiting until all assemebled bytes are written was looping indefinitely somehow..
+    //while (true){
+      //num_wrote += _output.write(_aux.substr(start + num_wrote, size - num_wrote));
       //cout<<num_wrote<<endl;
       //if (num_wrote == size){
       //break;
