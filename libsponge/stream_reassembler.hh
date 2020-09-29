@@ -16,8 +16,8 @@ class StreamReassembler {
     vector<char> _aux; // Auxiliary object to store assembled and unassembled bytes 
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
-    size_t _idx_unread; // Index for the start of unread bytes
-  size_t _empty; // Bitmask for denoting empty vs non-empty idxs in aux
+    size_t _start_aux; // Index for the start of unread bytes
+  vector<bool> _empty; // Vector for denoting empty vs non-empty idxs in aux
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
