@@ -33,6 +33,7 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 //! and the other stream runs from the remote TCPSender to the local TCPReceiver and
 //! has a different ISN.
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
+
   uint64_t e31 = static_cast<uint64_t>(1) << 31;
   uint64_t e32 = static_cast<uint64_t>(1) << 32;
   uint64_t mid = checkpoint + isn.raw_value();
@@ -51,7 +52,7 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
   cout << cand << endl;
   if (cand > low){
     if (cand > high + 1){
-      cand -= e32;
+       cand -= e32;
       cout<< "1st: "<< endl;
       return cand - isn.raw_value();
     }
