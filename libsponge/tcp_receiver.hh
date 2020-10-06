@@ -20,10 +20,12 @@ class TCPReceiver {
 
     //! The maximum number of bytes we'll store.
   size_t _capacity;
-  uint64_t _ckpt;
-  WrappingInt32 _isn;
-  bool _syn;
-  
+  size_t _assembled_bytes = _reassembler.stream_out().buffer_size; //num assembled but unread bytes
+  uint64_t _ckpt;// last assembled byte, ackno-1
+  WrappingInt32 _isn; //isn
+  WrappingInt32 _ack; //1st unassembled seqno
+  bool _syn; //whether syn is received
+  bool _fin; //whether fin is received
   public:
     //! \brief Construct a TCP receiver
     //!
