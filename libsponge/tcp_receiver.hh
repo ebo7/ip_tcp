@@ -20,12 +20,13 @@ class TCPReceiver {
 
     //! The maximum number of bytes we'll store.
   size_t _capacity;
-  uint64_t _ckpt=0;// last assembled byte, ackno-1
+  uint64_t _ckpt=0; // last assembled byte, ackno-1
   WrappingInt32 _isn{0}; //isn
   WrappingInt32 _ack{0}; //1st unassembled seqno
   bool _syn=false; //whether syn is received
   bool _fin=false; //whether fin is received
-  public:
+  uint64_t _len_stream=UINT64_MAX; //total length of bytestream to be written. Initialized to big number to not equal ckpt initially
+public:
     //! \brief Construct a TCP receiver
     //!
     //! \param capacity the maximum number of bytes that the receiver will
