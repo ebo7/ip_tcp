@@ -15,18 +15,20 @@
 //! remote TCPSender.
 class TCPReceiver {
   private:
-  //! Our data structure for re-assembling bytes.
+    //! Our data structure for re-assembling bytes.
     StreamReassembler _reassembler;
 
     //! The maximum number of bytes we'll store.
-  size_t _capacity;
-  uint64_t _ckpt=0; // last assembled byte, ackno-1
-  WrappingInt32 _isn{0}; //isn
-  WrappingInt32 _ack{0}; //1st unassembled seqno
-  bool _syn=false; //whether syn is received
-  bool _fin=false; //whether fin is received
-  uint64_t _len_stream=UINT64_MAX; //total length of bytestream to be written. Initialized to big number to not equal ckpt initially
-public:
+    size_t _capacity;       // distance from first unacceptable to first unread
+    uint64_t _ckpt = 0;     // last assembled byte, ackno-1
+    WrappingInt32 _isn{0};  // isn-initial seqno
+    WrappingInt32 _ack{0};  // 1st unassembled seqno
+    bool _syn = false;      // flag to indicate whether syn is received
+    bool _fin = false;      // flag to indicate whether fin is received
+    // total length of bytestream to be written. Initialized to big number to not equal ckpt initially
+    uint64_t _len_stream = UINT64_MAX;
+
+  public:
     //! \brief Construct a TCP receiver
     //!
     //! \param capacity the maximum number of bytes that the receiver will

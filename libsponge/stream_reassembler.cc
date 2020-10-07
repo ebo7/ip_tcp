@@ -27,7 +27,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     write_to_aux(data, index, eof);
     write_to_bytestream();
 
-    // Last byte could have been stitched previously, end_input without eof if necessary                                           
+    // Last byte could have been stitched previously, end_input without eof if necessary
     if (_start_aux == _end_stream) {
         _output.end_input();
     }
@@ -41,7 +41,7 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
         }
         return;
     }
-    
+
     // Index for the start of unacceptable bytes
     size_t end_aux = _start_aux + _capacity;
 
@@ -58,49 +58,38 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
 
     // Size of data to copy
     size_t size = end_copy - start_copy;
-    //cout << "SIZE TO COPY: "<< size<<endl;
+    // cout << "SIZE TO COPY: "<< size<<endl;
     // Location inside data to start copying
     size_t loc_data = start_copy - start_data;
 
     // Location inside aux to start copying
     size_t loc_aux = (start_copy) % _capacity;
 
-    //Depending on size of data to capy, we might wrap around _aux
-    if (loc_aux + size <= _capacity){
-      // Check how many empty spaces to fill
-      size_t count_empty = accumulate(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, 0);
+    // Depending on size of data to capy, we might wrap around _aux
+    if (loc_aux + size <= _capacity) {
+        // Check how many empty spaces to fill
+        size_t count_empty = accumulate(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, 0);
 
+        // cout<< (_empty.begin() + _capacity + 10 > _empty.end()) << endl;
 
-
-
-    
-      //cout<< (_empty.begin() + _capacity + 10 > _empty.end()) << endl;
-
-
-
-
-
-
-      _aux.replace(loc_aux, size, data.substr(loc_data, size));
-      _bytes_unass += count_empty;
-      fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
-    }//Wrapping around buffer
-    else{
-      //lefthand part size
-      size_t size_left = loc_aux + size - _capacity;
-      size_t count_empty = accumulate(_empty.begin() + loc_aux, _empty.end(), 0) +
-	accumulate(_empty.begin(), _empty.begin() + size_left, 0);
-      // righthand part size
-      size_t size_right = _capacity - loc_aux;
-      _aux.replace(loc_aux, size_right, data.substr(loc_data, size_right));
-      _aux.replace(0, size_left, data.substr(size_right, size));
-      _bytes_unass += count_empty;
-      fill(_empty.begin() + loc_aux,  _empty.end(), false);
-      fill(_empty.begin(), _empty.begin() + size_left, false);
-      
+        _aux.replace(loc_aux, size, data.substr(loc_data, size));
+        _bytes_unass += count_empty;
+        fill(_empty.begin() + loc_aux, _empty.begin() + loc_aux + size, false);
+    }  // Wrapping around buffer
+    else {
+        // lefthand part size
+        size_t size_left = loc_aux + size - _capacity;
+        size_t count_empty = accumulate(_empty.begin() + loc_aux, _empty.end(), 0) +
+                             accumulate(_empty.begin(), _empty.begin() + size_left, 0);
+        // righthand part size
+        size_t size_right = _capacity - loc_aux;
+        _aux.replace(loc_aux, size_right, data.substr(loc_data, size_right));
+        _aux.replace(0, size_left, data.substr(size_right, size));
+        _bytes_unass += count_empty;
+        fill(_empty.begin() + loc_aux, _empty.end(), false);
+        fill(_empty.begin(), _empty.begin() + size_left, false);
     }
-    
-    
+
     if (eof) {
         _end_stream = end_data;
     }
@@ -115,25 +104,22 @@ void StreamReassembler::write_to_bytestream() {
     auto it_start = _empty.begin() + (_start_aux % _capacity);
     auto it_end = find(it_start, _empty.end(), true);
     size_t size = it_end - it_start;
-    //cout << "ITER DIFF: " << size << endl;
     size_t num_wrote = _output.write(_aux.substr(start, size));
-    cout << "NUM WROTE1: " << num_wrote << endl;
-    
+
     // Mark sent byte idxs as empty
     fill(it_start, it_start + num_wrote, true);
-    
-    _start_aux += num_wrote;
-    _bytes_unass -= num_wrote;
-    //Wrapping around
-    if (it_end == _empty.end()){
-      it_end = find(_empty.begin(), it_start, true);
-      size = it_end - _empty.begin();
-      num_wrote = _output.write(_aux.substr(0, size));
-      fill(_empty.begin(), it_start, true);
 
     _start_aux += num_wrote;
     _bytes_unass -= num_wrote;
+    // Wrapping around
+    if (it_end == _empty.end()) {
+        it_end = find(_empty.begin(), it_start, true);
+        size = it_end - _empty.begin();
+        num_wrote = _output.write(_aux.substr(0, size));
+        fill(_empty.begin(), it_start, true);
 
+        _start_aux += num_wrote;
+        _bytes_unass -= num_wrote;
     }
 }
 
