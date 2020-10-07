@@ -11,13 +11,22 @@ using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
   TCPHeader header = seg.header();
-
+  WrappingInt32 seqno = header.seqno;
+  uint64_t start_payload;
   //need handshake
   if (!_syn && !header.syn){
     return;
-  }else if (header.syn){
-    _syn = true;
-    _isn = header.seqno;
+  }
+  else{
+    seqno = header.seqno;
+    if (header.syn){
+      _syn = true;
+      _isn = header.seqno;
+      start_payload = unwrap(seqno, _isn, _ckpt);
+      }
+    else{
+      start_payload = unwrap(seqno, _isn, _ckpt) - 1;
+    }
   }
 
   uint64_t len_in_seq = seg.length_in_sequence_space();
@@ -32,10 +41,6 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     len_payload = len_in_seq;
   }
   
-  
-  WrappingInt32 seqno = header.seqno;
-  uint64_t start_payload = unwrap(seqno, _isn, _ckpt) - 1;
-
   //determine complete length of stream
   bool eof = false;
   if (header.fin){
@@ -52,7 +57,14 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
   }else{
     _ack = wrap(_ckpt + 1, _isn);
   }
-  
+  cout << "-------------------------------" <<endl;
+  cout << "_CKPT: "<<_ckpt << endl;
+  cout << "PAYLOAD: " << data << endl;
+  cout << "LEN_PAYLOAD: "<< len_payload << endl;
+  cout << "SEQNO: " << seqno.raw_value() <<endl;
+  cout << "ISN: " << _isn << endl;
+  cout << "_LEN_STREAM: "<< _len_stream <<endl;
+  cout << "START_PAYLOAD: "<< start_payload << endl;
 }
 
 optional<WrappingInt32> TCPReceiver::ackno() const {
