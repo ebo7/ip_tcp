@@ -18,8 +18,8 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     return;
   }
   else{
-    seqno = header.seqno;
-    if (header.syn){
+    //start_payload is set depending on SYN
+      if (header.syn){
       _syn = true;
       _isn = header.seqno;
       start_payload = unwrap(seqno, _isn, _ckpt);
@@ -49,7 +49,17 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
   }
   
   string data = seg.payload().copy();
-  _reassembler.push_substring(data, start_payload, eof);
+
+  cout << "-------------------------------" <<endl;
+ cout<<"_CKPT b4: "<< _ckpt << endl;
+cout << "BUFFER SIZE b4: "<< _reassembler.stream_out().buffer_size() << endl;
+ cout <<"UNASS: "<< _reassembler.unassembled_bytes()<< endl;
+ cout<<"REMAIN b4: "<< _reassembler.stream_out().remaining_capacity() <<endl <<endl;
+
+
+ _reassembler.push_substring(data, start_payload, eof);
+
+ 
   _ckpt = _reassembler.stream_out().bytes_written();
   if (_ckpt == _len_stream){
     _ack = wrap(_ckpt + 2, _isn);
@@ -57,14 +67,18 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
   }else{
     _ack = wrap(_ckpt + 1, _isn);
   }
-  cout << "-------------------------------" <<endl;
-  cout << "_CKPT: "<<_ckpt << endl;
+  // cout << "-------------------------------" <<endl;
+ cout << "_CKPT: "<<_ckpt << endl;
+ cout << "BUFFER SIZE : "<< _reassembler.stream_out().buffer_size() << endl;
+ cout<<"REMAIN "<< _reassembler.stream_out().remaining_capacity() <<endl;
+
   cout << "PAYLOAD: " << data << endl;
-  cout << "LEN_PAYLOAD: "<< len_payload << endl;
-  cout << "SEQNO: " << seqno.raw_value() <<endl;
-  cout << "ISN: " << _isn << endl;
-  cout << "_LEN_STREAM: "<< _len_stream <<endl;
+  //cout << "LEN_PAYLOAD: "<< len_payload << endl;
+  //cout << "SEQNO: " << seqno.raw_value() <<endl;
+  // cout << "ISN: " << _isn << endl;
+  //cout << "_LEN_STREAM: "<< _len_stream <<endl;
   cout << "START_PAYLOAD: "<< start_payload << endl;
+  cout <<"EOF: "<< eof <<endl;
 }
 
 optional<WrappingInt32> TCPReceiver::ackno() const {

@@ -58,7 +58,7 @@ void StreamReassembler::write_to_aux(const string &data, const size_t start_data
 
     // Size of data to copy
     size_t size = end_copy - start_copy;
-
+    cout << "SIZE TO COPY: "<< size<<endl;
     // Location inside data to start copying
     size_t loc_data = start_copy - start_data;
 
@@ -85,11 +85,12 @@ void StreamReassembler::write_to_bytestream() {
 
     // Iterators for _empty
     auto it_start = _empty.begin() + (_start_aux % _capacity);
-    auto it_end = find(it_start, _empty.end(), true);
+    auto it_end = find(it_start, it_start-1, true);
 
     size_t size = it_end - it_start;
+    cout << "ITER DIFF: " << size << endl;
     size_t num_wrote = _output.write(_aux.substr(start, size));
-
+    cout << "NUM WROTE: " << num_wrote << endl;
     // Implementation where it waits until all assemebled bytes are written to bytestream but was looping indefinitely..
     // while (true){
     // num_wrote += _output.write(_aux.substr(start + num_wrote, size - num_wrote));
