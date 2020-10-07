@@ -12,22 +12,30 @@ using namespace std;
 void TCPReceiver::segment_received(const TCPSegment &seg) {
   TCPHeader header = seg.header();
   
-  if (!_syn && !seg.header.syn){
+  if (!_syn && !seg.header().syn){
     return;
-  }
-  uint64_t len_pay;
-  else if (seg.header.syn){
+  }else if (seg.header().syn){
     _syn = true;
     _isn = header.seqno;
   }
+  WrappingInt32 seqno = header.seqno;
+  uint64_t idx_stream = unwrap(seqno, _isn, _ckpt) - 1;
+  bool eof = false;
+  if (seg.header().fin){
+    eof = true;
+  }
+  string data = seg.payload().copy();
+  _reassembler.push_substring(data, idx_stream, eof);
+  _ckpt = _reassembler.stream_out().bytes_written();
   
-  //_stream_reassembler.push_substring(data, idx, eof)
-  string buffer = seg.payload().copy();
-  cout << buffer << endl;
 }
 
-optional<WrappingInt32> TCPReceiver::ackno() const { return {}; }
+optional<WrappingInt32> TCPReceiver::ackno() const {
+  if (_syn){
+    return wrap(_ckpt + 1, _isn);
+  }return{};
+}
 
 size_t TCPReceiver::window_size() const {
-  return _capacity;
+  return _capacity - _reassembler.stream_out().buffer_size();
 }

@@ -49,21 +49,21 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
       }
   uint64_t num_cycle = mid / e32;
   uint64_t cand = n.raw_value() + num_cycle * e32;
-  cout << cand << endl;
+  //cout << cand << endl;
   if (cand > low){
     if (cand > high + 1){
        cand -= e32;
-      cout<< "1st: "<< endl;
+       //cout<< "1st: "<< endl;
       return cand - isn.raw_value();
     }
-    cout<<"2nd: " <<endl;
+    //cout<<"2nd: " <<endl;
     if (isn.raw_value() > cand){
       return cand + e32 - isn.raw_value();
     }
     return cand - isn.raw_value();
   }else{
     //cout<< low<<endl;
-    cout<<"3rd: " << endl;
+    //cout<<"3rd: " << endl;
     return cand + e32 - isn.raw_value();
   }
    //return n.raw_value() + (num_cycle - 1) * e3g2 - isn.raw_value();
