@@ -20,11 +20,24 @@ using namespace std;
 TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const std::optional<WrappingInt32> fixed_isn)
     : _isn(fixed_isn.value_or(WrappingInt32{random_device()()}))
     , _initial_retransmission_timeout{retx_timeout}
-    , _stream(capacity) {}
+    , _stream(capacity)
+{}
+
 
 uint64_t TCPSender::bytes_in_flight() const { return {}; }
 
-void TCPSender::fill_window() {}
+void TCPSender::fill_window() {
+
+  //
+  while(true){
+    TCPSegment seg;
+    TCPHeader header = seg.header();
+    seg.payload() = "";
+    _outstanding.push(seg);
+    break;
+  }
+}
+
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
