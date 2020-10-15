@@ -83,7 +83,6 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
   if (tmp == _next_seqno){
     //check timer; if timed out, retransmit
     _consec_retrans++;
-    //
     return;
   }
   if (_next_seqno == 1){return;}

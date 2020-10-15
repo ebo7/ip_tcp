@@ -17,12 +17,7 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
-  //outstanding segments
-  std::queue<TCPSegment> _outstanding;
-  //bytes_flying
-  uint64_t _bytes_flying{0};
-    
-  
+
     //! our initial sequence number, the number for our SYN.
     WrappingInt32 _isn;
 
@@ -37,7 +32,25 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
+//current RTO                                                                                              
+  uint64_t _curr_RTO;  
+//outstanding segments                                                                                     
+  std::queue<TCPSegment> _segments_outstanding{};
 
+  //store last absolute seqno of outstanding segments                                                        
+  std::queue<uint64_t> _seqnos_abs_outstanding{};
+
+  //initial timestamps for outgoing                                                                          
+  std::queue<uint64_t> _timestamps_outstanding{};
+
+  //bytes_flying, not sure if will be needed                                                                 
+  uint64_t _bytes_flying{0};
+
+  //window_size from sender's perspective                                                                    
+  uint64_t _window_size{0};
+
+  //number of consecutive retransmissions
+  unsigned int _consec_retrans{0};
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
