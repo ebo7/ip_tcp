@@ -8,7 +8,7 @@
 
 #include <functional>
 #include <queue>
-
+#include <deque>
 //! \brief The "sender" part of a TCP implementation.
 
 //! Accepts a ByteStream, divides it up into segments and sends the
@@ -32,16 +32,16 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
-//current RTO                                                                                              
+  //current RTO                                                                                              
   uint64_t _curr_RTO;  
-//outstanding segments                                                                                     
-  std::queue<TCPSegment> _segments_outstanding{};
+  //outstanding segments                                                                                     
+  std::deque<TCPSegment> _segments_outstanding{};
 
   //store last absolute seqno of outstanding segments                                                        
-  std::queue<uint64_t> _seqnos_abs_outstanding{};
+  std::deque<uint64_t> _seqnos_abs_outstanding{};
 
   //initial timestamps for outgoing                                                                          
-  std::queue<uint64_t> _timestamps_outstanding{};
+  std::deque<uint64_t> _timestamps_outstanding{};
 
   //bytes_flying, not sure if will be needed                                                                 
   uint64_t _bytes_flying{0};
@@ -54,6 +54,9 @@ class TCPSender {
 
   //previous absolute ackno
   uint64_t _ack_abs{0};
+  //timer-starts when tick is called??
+  uint64_t _time{0};
+  
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
