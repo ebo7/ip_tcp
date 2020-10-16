@@ -41,7 +41,8 @@ void TCPSender::fill_window() {
   cout << "buf: " << _stream.buffer_size() << endl;
   cout << "ack: "<<_ack_abs << endl;
   cout << "window:" << _window_size << endl;
-  
+  cout << "bytes flying: " << _bytes_flying << endl;
+  cout << "eof: " << _stream.eof() << endl;
   if(_window_size == 0){ //_ack_abs < _next_seqno){
     cout<<"EMPTY WINDOW" << endl;
     return;
@@ -89,6 +90,11 @@ void TCPSender::fill_window() {
     uint64_t size_seg = min(min(_stream.buffer_size(), _window_size), TCPConfig::MAX_PAYLOAD_SIZE);
     seg.header().seqno = next_seqno();
     seg.payload() = static_cast<Buffer>(_stream.read(size_seg));
+    cout <<"pay eof: "<< _stream.eof() << endl;
+    //piggyback fin
+    if(_stream.eof()){
+      seg.header().fin = true;
+    }
     //Change state vars
      _segments_out.push(seg);
      _segments_outstanding.push_back(seg);
@@ -100,6 +106,7 @@ void TCPSender::fill_window() {
     _timestamps_outstanding.push_back(_time);
 
   }
+  
 }
 
 
