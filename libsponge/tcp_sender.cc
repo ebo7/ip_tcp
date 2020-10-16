@@ -118,21 +118,22 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
   uint64_t bytes_ack = ack_abs - _ack_abs;
  _bytes_flying -= bytes_ack;
  _ack_abs = ack_abs;
+ _consec_retrans = 0;
   
-  
-  //look thru outstanding acks, remove or resend
+  //look thru outstanding acks and remove acknowledged ones
   while(!_seqnos_abs_outstanding.empty()){
     if(_ack_abs >= _seqnos_abs_outstanding.front()){
-      //cout <<"POPPING: " << _seqnos_abs_outstanding.front() << endl;
       _seqnos_abs_outstanding.pop_front();
       _segments_outstanding.pop_front();
       _timestamps_outstanding.pop_front();
-      //      _bytes_flying -= _segments_outstanding.front().length_in_sequence_space();
     }else{
       break;
     }
   }
-  
+  //reset the leftover timestamps
+  for (size_t i=0; i<_timestamps_outstanding.size(); i++){
+    _timestamps_outstanding[i] = _time;
+  }  
   if (_window_size > 0){
     //cout << "FROM ACK RECEIVED" << endl;
     TCPSender::fill_window();
