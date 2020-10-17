@@ -6,9 +6,9 @@
 #include "tcp_segment.hh"
 #include "wrapping_integers.hh"
 
+#include <deque>
 #include <functional>
 #include <queue>
-#include <deque>
 //! \brief The "sender" part of a TCP implementation.
 
 //! Accepts a ByteStream, divides it up into segments and sends the
@@ -17,7 +17,6 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
-
     //! our initial sequence number, the number for our SYN.
     WrappingInt32 _isn;
 
@@ -32,34 +31,37 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
-  //current RTO                                                                                              
-  uint64_t _curr_RTO;  
-  //outstanding segments                                                                                     
-  std::deque<TCPSegment> _segments_outstanding{};
 
-  //store last absolute seqno of outstanding segments                                                        
-  std::deque<uint64_t> _seqnos_abs_outstanding{};
+    // current RTO
+    uint64_t _curr_RTO;
 
-  //initial timestamps for outgoing                                                                          
-  std::deque<uint64_t> _timestamps_outstanding{};
+    // outstanding segments
+    std::deque<TCPSegment> _segments_outstanding{};
 
-  //bytes_flying, not sure if will be needed                                                                 
-  uint64_t _bytes_flying{0};
+    // store last+1 absolute seqno of outstanding segments
+    std::deque<uint64_t> _seqnos_abs_outstanding{};
 
-  //window_size from sender's perspective                                                                    
-  uint64_t _window_size{1};
+    // initial timestamps for outstanding segments
+    std::deque<uint64_t> _timestamps_outstanding{};
 
-  //number of consecutive retransmissions
-  unsigned int _consec_retrans{0};
+    // total bytes in outstanding segments
+    uint64_t _bytes_flying{0};
 
-  //previous absolute ackno
-  uint64_t _ack_abs{0};
-  //timer-starts when tick is called??
-  uint64_t _time{0};
-  
-  //check if fin flag is sent already
-  bool _fin_sent{false};
-  
+    // window_size from sender's perspective
+    uint64_t _window_size{1};
+
+    // number of consecutive retransmissions
+    unsigned int _consec_retrans{0};
+
+    // previous absolute ackno
+    uint64_t _ack_abs{0};
+
+    // overall time starting from 0
+    uint64_t _time{0};
+
+    // check if fin flag is sent already
+    bool _fin_sent{false};
+
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
