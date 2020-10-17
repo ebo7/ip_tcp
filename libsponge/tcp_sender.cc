@@ -123,7 +123,7 @@ void TCPSender::fill_window() {
   while(_stream.buffer_size() > 0 && _window_size > _bytes_flying){
     cout << "PAY" << endl;
     TCPSegment seg;
-    uint64_t size_seg = min(min(_stream.buffer_size(), _window_size), TCPConfig::MAX_PAYLOAD_SIZE);
+    uint64_t size_seg = min(min(_stream.buffer_size(), _window_size - _bytes_flying), TCPConfig::MAX_PAYLOAD_SIZE);
     seg.header().seqno = next_seqno();
     seg.payload() = static_cast<Buffer>(_stream.read(size_seg));
     //cout <<"pay eof: "<< _stream.eof() << endl;
