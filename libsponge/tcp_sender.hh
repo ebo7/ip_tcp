@@ -47,7 +47,7 @@ class TCPSender {
   uint64_t _bytes_flying{0};
 
   //window_size from sender's perspective                                                                    
-  uint64_t _window_size{1};
+  uint64_t _window_size{0};
 
   //number of consecutive retransmissions
   unsigned int _consec_retrans{0};
@@ -56,6 +56,9 @@ class TCPSender {
   uint64_t _ack_abs{0};
   //timer-starts when tick is called??
   uint64_t _time{0};
+  
+  //check if fin flag is sent already
+  bool _fin_sent{false};
   
   public:
     //! Initialize a TCPSender

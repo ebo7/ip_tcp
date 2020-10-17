@@ -23,7 +23,7 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , _initial_retransmission_timeout{retx_timeout}
     , _stream(capacity)
     , _curr_RTO(_initial_retransmission_timeout){
-           cout<<"CONSTRUCT XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" <<endl;
+           cout<<"CONSTRUCT XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" <<endl;
 }
 
 //_bytes_flying is added up in fill_window()
@@ -43,12 +43,14 @@ void TCPSender::fill_window() {
   cout << "window:" << _window_size << endl;
   cout << "bytes flying: " << _bytes_flying << endl;
   cout << "eof: " << _stream.eof() << endl;
-  if(_window_size == 0){ //_ack_abs < _next_seqno){
-    cout<<"EMPTY WINDOW" << endl;
-    return;
-  }
-  
-  //Send SYN
+  //if (_bytes_flying==0 && _window_size==0 && _ack_abs!=0){
+    //cout << "0--->1" << endl;
+    //_window_size=1;
+    //}else{
+    //cout<< "DO NOTHING"<<endl;
+    //return;
+    // }
+    //Send SYN
   if (_next_seqno == 0){
     cout << "SYN" << endl;
     TCPSegment seg;
@@ -64,9 +66,27 @@ void TCPSender::fill_window() {
     _timestamps_outstanding.push_back(_time);
     return;
   }
+  //if(_window_size==0){
+  //if(_bytes_flying==0 && _ack_abs!=0){
+  //  _window_size = 1;
+  //  cout << "0--->1" << endl;
+  //}else{
+      //      _window_size = 1;
+  //  return;
+  //}
+
+  //}
+  //  if(_window_size==0 && !_stream.eof() && _stream.buffer_size()==0){
+  //  //send empty;
+    //  TCPSender::send_empty_segment(); 
+  //return;
+  //}else if(_window_size==0){
+  //  return;
+  //}
   
   //Send FIN
-  if(_stream.eof() && _next_seqno == (_stream.bytes_read()  + 1)){
+  if( _stream.eof() && !_fin_sent  &&
+  (_window_size>_bytes_flying || (_window_size==0 && _bytes_flying==0))){
     cout << "FIN" << endl;
     TCPSegment seg;
     seg.header().fin = true;
@@ -76,36 +96,59 @@ void TCPSender::fill_window() {
     _segments_outstanding.push_back(seg);
     _bytes_flying++;
     _next_seqno++;
-    _window_size--;
+    if(_window_size != 0){
+      //_window_size--;
+    }
     _seqnos_abs_outstanding.push_back(_next_seqno);
     //plaeholder for timestamp
     _timestamps_outstanding.push_back(_time);
+    _fin_sent = true;
     return;
   }
 
-  //Send Payload
-  while(_stream.buffer_size() > 0 && _window_size > 0){
+  //Send size 1 payload
+  if (_stream.buffer_size() > 0 && _window_size==0 && _bytes_flying==0){
+    TCPSegment seg;
+    seg.header().seqno = next_seqno();
+    seg.payload() = static_cast<Buffer>(_stream.read(1));
+    _segments_out.push(seg);
+    _segments_outstanding.push_back(seg);
+    _bytes_flying++;
+    _next_seqno++;
+    _seqnos_abs_outstanding.push_back(_next_seqno);
+     //plaeholder for timestamp                                                                                     
+    _timestamps_outstanding.push_back(_time);
+    return;
+  }
+  while(_stream.buffer_size() > 0 && _window_size > _bytes_flying){
     cout << "PAY" << endl;
     TCPSegment seg;
     uint64_t size_seg = min(min(_stream.buffer_size(), _window_size), TCPConfig::MAX_PAYLOAD_SIZE);
     seg.header().seqno = next_seqno();
     seg.payload() = static_cast<Buffer>(_stream.read(size_seg));
-    cout <<"pay eof: "<< _stream.eof() << endl;
+    //cout <<"pay eof: "<< _stream.eof() << endl;
     //piggyback fin
-    if(_stream.eof()){
+    cout << "pay size: "<< size_seg<<endl;
+    //_window_size -= size_seg;
+    _bytes_flying+=size_seg;
+    if(_stream.eof() && !_fin_sent && _window_size>_bytes_flying){
+      cout << "piggy" << endl;
       seg.header().fin = true;
+      _fin_sent = true;
+      //_window_size--;
+      _bytes_flying++;
+      _next_seqno++;
     }
     //Change state vars
      _segments_out.push(seg);
      _segments_outstanding.push_back(seg);
-     _bytes_flying += size_seg;
      _next_seqno += size_seg;
-     _window_size -= size_seg;
      _seqnos_abs_outstanding.push_back(_next_seqno);
      //plaeholder for timestamp                                                                                     
     _timestamps_outstanding.push_back(_time);
 
   }
+  
   
 }
 
@@ -117,8 +160,11 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
   cout << "ACK CALLED" <<endl;
   uint64_t ack_abs = unwrap(ackno, _isn, _next_seqno);
   cout << "ack_abs: "<<ack_abs << endl;
+  cout << "window size: " << window_size << endl;
+  cout << "bytes flying:" << _bytes_flying << endl;
   _window_size = window_size;
   if (ack_abs <= _ack_abs){
+    cout << "USELESS ACK RECEIVED" << endl;
     return;
   }
   _curr_RTO = _initial_retransmission_timeout;
@@ -126,7 +172,6 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
  _bytes_flying -= bytes_ack;
  _ack_abs = ack_abs;
  _consec_retrans = 0;
-  
   //look thru outstanding acks and remove acknowledged ones
   while(!_seqnos_abs_outstanding.empty()){
     if(_ack_abs >= _seqnos_abs_outstanding.front()){
@@ -141,44 +186,45 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
   for (size_t i=0; i<_timestamps_outstanding.size(); i++){
     _timestamps_outstanding[i] = _time;
   }  
-  if (_window_size > 0){
-    //cout << "FROM ACK RECEIVED" << endl;
+  if (_window_size > _bytes_flying){
+    cout << "=====FROM ACK RECEIVED=====" << endl;
     TCPSender::fill_window();
+  }else{
+    //send empty segment
+    //TCPSender::send_empty_segment(); 
   }
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
-  DUMMY_CODE(ms_since_last_tick);
-  cout << "--------------------------" << endl;
+  if (_timestamps_outstanding.empty()){
+      return;
+    }
+  cout << "=========================================================" << endl;
   cout << "TICK CALLED" << endl;
-  cout << "interval: "<<ms_since_last_tick << endl;
+  cout << "ms_tick: "<<ms_since_last_tick << endl;
   _time += ms_since_last_tick;
-  cout << "time: "<< _time << endl;
   cout << "curr_RTO: " << _curr_RTO  <<endl;
-  cout <<"init_RTO: " << _initial_retransmission_timeout << endl;
-
+  cout << "time: " << _time << endl;
+  cout << "timestamp: " << _timestamps_outstanding[0] << endl;
+  cout<<"time diff: " << _time - _timestamps_outstanding[0] << endl;
+  cout <<"bytes_flying: " << _bytes_flying << endl;
+  cout << "_window size: "<<_window_size << endl;
   for (size_t i=0; i<_timestamps_outstanding.size(); i++){
-    cout <<i<<": " << _timestamps_outstanding[i] << endl;
-
-    if (_time - _timestamps_outstanding[i] >= _curr_RTO){
-      cout << "Resending"  << endl;
-      
-      cout << "window size: "<<_window_size << endl;				      
-      cout<<"seg size: "<< _segments_outstanding[i].length_in_sequence_space()<<endl;
-      cout<< "seg end seqno: " << _seqnos_abs_outstanding[i] << endl;
-      cout << "ack: " << _ack_abs << endl;
-      _segments_out.push(_segments_outstanding[i]);
-      _timestamps_outstanding[i] = _time;
-
-      if(_window_size > 0){
-	cout<<"retrans incremented" << endl;
-	_consec_retrans++;
-	_curr_RTO *= 2;
-      }
-      break;
+    cout << _seqnos_abs_outstanding[i] << endl;
+  }
+  if (_time - _timestamps_outstanding[0] >= _curr_RTO){
+    cout << "resending" << endl;
+    cout << "last seqno is: " << _seqnos_abs_outstanding[0] << endl;
+    _segments_out.push(_segments_outstanding[0]);
+    _timestamps_outstanding[0] = _time;
+    if (_window_size!=0){
+      cout << "doubling" << endl;
+      _consec_retrans++;
+      _curr_RTO *= 2;
     }
   }
+  cout << "=========================================================" << endl;
 }
 
 
@@ -190,4 +236,8 @@ unsigned int TCPSender::consecutive_retransmissions() const {
 
 void TCPSender::send_empty_segment() {
   cout << "SEND EMPTY CALLED" << endl;
+  TCPSegment seg;
+  seg.header().seqno = next_seqno();
+  seg.payload() = static_cast<Buffer>("");
+  _segments_out.push(seg);
 }
