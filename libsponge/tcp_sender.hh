@@ -47,7 +47,7 @@ class TCPSender {
   uint64_t _bytes_flying{0};
 
   //window_size from sender's perspective                                                                    
-  uint64_t _window_size{0};
+  uint64_t _window_size{1};
 
   //number of consecutive retransmissions
   unsigned int _consec_retrans{0};
