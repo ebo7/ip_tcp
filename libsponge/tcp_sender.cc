@@ -151,7 +151,9 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
 }
 
 // Signals if the connection is hopeless
-unsigned int TCPSender::consecutive_retransmissions() const { return _consec_retrans; }
+unsigned int TCPSender::consecutive_retransmissions() const {
+  return _consec_retrans;
+}
 
 // Send empty segment for empty ACK
 void TCPSender::send_empty_segment() {
@@ -160,3 +162,4 @@ void TCPSender::send_empty_segment() {
     seg.payload() = static_cast<Buffer>("");
     _segments_out.push(seg);
 }
+

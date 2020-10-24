@@ -12,29 +12,47 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-size_t TCPConnection::remaining_outbound_capacity() const { return {}; }
+size_t TCPConnection::remaining_outbound_capacity() const {
+  return _sender.remaining_outbound_capacity();
+}
 
-size_t TCPConnection::bytes_in_flight() const { return {}; }
+size_t TCPConnection::bytes_in_flight() const {
+  return _sender.bytes_in_flight();
+}
 
-size_t TCPConnection::unassembled_bytes() const { return {}; }
+size_t TCPConnection::unassembled_bytes() const {
+  return _receiver.unassembled_bytes();
+}
+//call tick for receiver?
+size_t TCPConnection::time_since_last_segment_received() const {
+  return _sender.time() - _time_received;
+}
 
-size_t TCPConnection::time_since_last_segment_received() const { return {}; }
+void TCPConnection::segment_received(const TCPSegment &seg) {
+  _receiver.segment_received(seg);
+  _time_received = _sender.time();
+}
 
-void TCPConnection::segment_received(const TCPSegment &seg) { DUMMY_CODE(seg); }
-
-bool TCPConnection::active() const { return {}; }
+bool TCPConnection::active() const {
+  return {};
+}
 
 size_t TCPConnection::write(const string &data) {
-    DUMMY_CODE(data);
-    return {};
+  return _sender.stream_in().write(data);
 }
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
-void TCPConnection::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
+void TCPConnection::tick(const size_t ms_since_last_tick) {
+  _sender.tick(ms_since_last_tick);
+}
 
-void TCPConnection::end_input_stream() {}
+void TCPConnection::end_input_stream() {
+  _sender.end_input();
+}
 
-void TCPConnection::connect() {}
+void TCPConnection::connect() {
+  _sender.fill_window();
+}
 
 TCPConnection::~TCPConnection() {
     try {
