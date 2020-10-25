@@ -100,12 +100,18 @@ void TCPSender::fill_window() {
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size Thte remote receiver's advertised window size
 void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    uint64_t ack_abs = unwrap(ackno, _isn, _next_seqno);
-    _window_size = window_size;
-
-    if (ack_abs <= _ack_abs) {
-        return;
-    }
+  cout << "ack: " << ackno << endl;
+  cout << "isn: " << _isn << endl;
+  cout << "next_seqno: " << _next_seqno << endl;
+  cout <<"stream read: " << _stream.bytes_read() << endl; 
+  uint64_t ack_abs = unwrap(ackno, _isn, _stream.bytes_read());
+  _window_size = window_size;
+  cout << "ack_abs: " << ack_abs << endl;
+  //invalid or useless ack received
+  if (ack_abs > _stream.bytes_read()+2 || ack_abs<= _ack_abs){
+    return;
+  }
+    
 
     // new ACK received
     _curr_RTO = _initial_retransmission_timeout;

@@ -5,7 +5,7 @@
 #include "tcp_receiver.hh"
 #include "tcp_sender.hh"
 #include "tcp_state.hh"
-
+#include <iostream>
 //! \brief A complete endpoint of a TCP connection
 class TCPConnection {
   private:
@@ -31,7 +31,12 @@ class TCPConnection {
   bool _outbound_fin_sent{false};
   bool _lingering{false};
   bool _seg_received_lingering{false};
+  bool _outbound_ackd{false};
   public:
+  //transfer _sender segments to connection
+  void send_segments();
+  //
+  void handle_send_rst();
     //! \name "Input" interface for the writer
     //!@{
 
@@ -89,9 +94,11 @@ class TCPConnection {
     //! after both streams have finished (e.g. to ACK retransmissions from the peer)
     bool active() const;
     //!@}
-
+    
     //! Construct a new connection from a configuration
-    explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {}
+    explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {
+      cout<<"=======================CONSTRUCTED===================================" << endl;
+    }
 
     //! \name construction and destruction
     //! moving is allowed; copying is disallowed; default construction not possible
