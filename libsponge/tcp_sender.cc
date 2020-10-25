@@ -53,6 +53,7 @@ void TCPSender::fill_window() {
         // Plaeholder for timestamp
         _timestamps_outstanding.push_back(_time);
         _fin_sent = true;
+	_time_fin_sent = _time;
         return;
     }
 
@@ -84,6 +85,7 @@ void TCPSender::fill_window() {
             _fin_sent = true;
             _bytes_flying++;
             _next_seqno++;
+	    _time_fin_sent = _time;
         }
         // Change state vars
         _segments_out.push(seg);

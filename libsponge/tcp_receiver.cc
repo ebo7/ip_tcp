@@ -38,15 +38,15 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     }
 
     // determine complete length of stream from len_payload
-    bool eof = false;
+    //bool eof = false;
     if (header.fin) {
         _len_stream = start_payload + len_payload;
-        eof = true;
+        _eof = true;
     }
 
     // write to _reassembler
     string data = seg.payload().copy();
-    _reassembler.push_substring(data, start_payload, eof);
+    _reassembler.push_substring(data, start_payload, _eof);
     _ckpt = _reassembler.stream_out().bytes_written();
 
     // send input_ended signal if needed and compute acknowledgement seqno
