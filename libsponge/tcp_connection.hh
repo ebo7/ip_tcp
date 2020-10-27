@@ -32,6 +32,8 @@ class TCPConnection {
   bool _lingering{false};
   bool _seg_received_lingering{false};
   bool _outbound_ackd{false};
+  bool _connect_called{false};
+  bool _syn_is_seen{false};
   public:
   //transfer _sender segments to connection
   void send_segments();
@@ -97,7 +99,7 @@ class TCPConnection {
     
     //! Construct a new connection from a configuration
     explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {
-      cout<<"=======================CONSTRUCTED===================================" << endl;
+      //      cout<<"=======================CONSTRUCTED===================================" << endl;
     }
 
     //! \name construction and destruction

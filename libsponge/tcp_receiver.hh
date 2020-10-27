@@ -26,6 +26,7 @@ class TCPReceiver {
     bool _syn = false;      // flag to indicate whether syn is received
     bool _fin = false;      // flag to indicate whether fin is received
   bool _eof = false; //indicate whehter inbound finished
+  bool _fin_seen = false;
     // total length of bytestream to be written. Initialized to big number to not equal ckpt initially
     uint64_t _len_stream = UINT64_MAX;
 
@@ -68,7 +69,7 @@ class TCPReceiver {
     //! \name "Output" interface for the reader
   ByteStream &stream_out() { return _reassembler.stream_out(); }
     const ByteStream &stream_out() const { return _reassembler.stream_out(); }
-  bool eof() const{return _eof;};
+
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_RECEIVER_HH

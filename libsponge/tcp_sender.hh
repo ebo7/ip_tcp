@@ -61,6 +61,7 @@ class TCPSender {
   uint64_t _time_fin_sent{0};
     // check if fin flag is sent already
     bool _fin_sent{false};
+  
 
   public:
     //! Initialize a TCPSender
@@ -121,7 +122,8 @@ class TCPSender {
   //following variables are used in  TCPConnection to access the private members
   uint64_t time_fin_sent() const{return _time_fin_sent;};
   bool fin_sent() const{return _fin_sent;};
-  uint64_t ack_abs() const{return _ack_abs;};
+  uint64_t ack_abs() {return _ack_abs;};
+  uint64_t next_seqno_abs() {return _next_seqno;};
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_SENDER_HH

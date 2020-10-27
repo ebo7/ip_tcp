@@ -10,7 +10,6 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     TCPHeader header = seg.header();
     WrappingInt32 seqno = header.seqno;
     uint64_t start_payload;
-
     // need handshake
     if (!_syn && !header.syn) {
         return;
@@ -24,7 +23,9 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
             start_payload = unwrap(seqno, _isn, _ckpt) - 1;
         }
     }
-
+    if(header.fin and !_fin_seen){
+      _fin_seen = true;
+    }
     uint64_t len_in_seq = seg.length_in_sequence_space();
     uint64_t len_payload;
 
@@ -52,9 +53,12 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     // send input_ended signal if needed and compute acknowledgement seqno
     if (_ckpt == _len_stream) {
         _ack = wrap(_ckpt + 2, _isn);
-        _reassembler.stream_out().end_input();
+		        _reassembler.stream_out().end_input();
     } else {
         _ack = wrap(_ckpt + 1, _isn);
+    }
+    if(!_fin_seen && header.fin){// && _ckpt == _len_stream){
+      _reassembler.stream_out().end_input();
     }
 }
 
