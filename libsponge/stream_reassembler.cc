@@ -24,29 +24,29 @@ StreamReassembler::StreamReassembler(const size_t capacity)
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
-  //if(!_eof_seen){
+    // if(!_eof_seen){
     //_eof_seen = eof;
     //}
-  write_to_aux(data, index, eof);
+    write_to_aux(data, index, eof);
     write_to_bytestream();
 
     //        Last byte could have been stitched previously, end_input without eof if necessary
-    if(!_eof_seen){
-    _eof_seen = eof;
-  }
-    if (_start_aux == _end_stream){// && unassembled_bytes()==0) {
-      _output.end_input();
+    if (!_eof_seen) {
+        _eof_seen = eof;
+    }
+    if (_start_aux == _end_stream) {  // && unassembled_bytes()==0) {
+        _output.end_input();
     }
 }
 // Write data into the auxiliary storage object
 void StreamReassembler::write_to_aux(const string &data, const size_t start_data, const bool eof) {
-  if (data.size() == 0) {
-      if (eof) {
+    if (data.size() == 0) {
+        if (eof) {
             // Bytestream finished already
-        _output.end_input();
+            _output.end_input();
+        }
+        return;
     }
-      return;
-  }
 
     // Index for the start of unacceptable bytes
     size_t end_aux = _start_aux + _capacity;

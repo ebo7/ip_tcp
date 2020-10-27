@@ -5,6 +5,7 @@
 #include "tcp_receiver.hh"
 #include "tcp_sender.hh"
 #include "tcp_state.hh"
+
 #include <iostream>
 //! \brief A complete endpoint of a TCP connection
 class TCPConnection {
@@ -19,26 +20,23 @@ class TCPConnection {
     //! Should the TCPConnection stay active (and keep ACKing)
     //! for 10 * _cfg.rt_timeout milliseconds after both streams have ended,
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
-    bool _linger_after_streams_finish{true};
+  bool _linger_after_streams_finish{true};
   uint64_t _time_last_segment_received{0};
   uint64_t _time{0};
-  uint64_t _time_inbound_ended{0};
-  uint64_t _time_fin_sent{0};
-  uint64_t _time_linger_started{0};
+
   size_t _remaining_outbound_capacity{1};
-  bool _rst{false};
+  bool _rst_received{false};
+  bool _rst_to_send{false};//rst needs to be sent
   bool _inbound_ended{false};
-  bool _outbound_fin_sent{false};
-  bool _lingering{false};
-  bool _seg_received_lingering{false};
-  bool _outbound_ackd{false};
-  bool _connect_called{false};
-  bool _syn_is_seen{false};
+  bool _outbound_ackd{false};//outbound stream is ack'd
+    bool _connect_called{false};//connect() is called
+    bool _rst_sended{false}; //rst sent
+
   public:
-  //transfer _sender segments to connection
-  void send_segments();
-  //
-  void handle_send_rst();
+    // transfer _sender segments to connection
+    void send_segments();
+    //
+    void handle_send_rst();
     //! \name "Input" interface for the writer
     //!@{
 
@@ -96,10 +94,10 @@ class TCPConnection {
     //! after both streams have finished (e.g. to ACK retransmissions from the peer)
     bool active() const;
     //!@}
-    
+
     //! Construct a new connection from a configuration
     explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {
-      //      cout<<"=======================CONSTRUCTED===================================" << endl;
+        //      cout<<"=======================CONSTRUCTED===================================" << endl;
     }
 
     //! \name construction and destruction

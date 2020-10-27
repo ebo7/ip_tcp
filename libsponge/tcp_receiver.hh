@@ -25,8 +25,8 @@ class TCPReceiver {
     WrappingInt32 _ack{0};  // 1st unassembled seqno
     bool _syn = false;      // flag to indicate whether syn is received
     bool _fin = false;      // flag to indicate whether fin is received
-  bool _eof = false; //indicate whehter inbound finished
-  bool _fin_seen = false;
+    bool _eof = false;      // indicate whehter inbound finished
+    bool _fin_seen = false;
     // total length of bytestream to be written. Initialized to big number to not equal ckpt initially
     uint64_t _len_stream = UINT64_MAX;
 
@@ -59,7 +59,7 @@ class TCPReceiver {
     //! beginning of the window (the ackno).
     size_t window_size() const;
     //!@}
-
+    WrappingInt32 isn() const { return _isn; };
     //! \brief number of bytes stored but not yet reassembled
     size_t unassembled_bytes() const { return _reassembler.unassembled_bytes(); }
 
@@ -67,9 +67,8 @@ class TCPReceiver {
     void segment_received(const TCPSegment &seg);
 
     //! \name "Output" interface for the reader
-  ByteStream &stream_out() { return _reassembler.stream_out(); }
+    ByteStream &stream_out() { return _reassembler.stream_out(); }
     const ByteStream &stream_out() const { return _reassembler.stream_out(); }
-
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_RECEIVER_HH

@@ -14,7 +14,6 @@ using namespace std;
 ByteStream::ByteStream(const size_t capacity) : cap(capacity), deq() {}
 // Writes from data to deq stream
 size_t ByteStream::write(const string &data) {
-
     // Data can be bigger than size_left
     size_t size = min(data.size(), remaining_capacity());
     bytes_wrote += size;
