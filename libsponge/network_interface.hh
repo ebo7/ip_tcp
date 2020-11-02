@@ -7,7 +7,7 @@
 
 #include <optional>
 #include <queue>
-
+#include <map>
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
 
@@ -31,6 +31,9 @@
 //! and learns or replies as necessary.
 class NetworkInterface {
   private:
+
+  std::map<Address, EthernetAddress> pairings{};
+  
     //! Ethernet (known as hardware, network-access-layer, or link-layer) address of the interface
     EthernetAddress _ethernet_address;
 
