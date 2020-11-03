@@ -20,17 +20,17 @@ class TCPConnection {
     //! Should the TCPConnection stay active (and keep ACKing)
     //! for 10 * _cfg.rt_timeout milliseconds after both streams have ended,
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
-  bool _linger_after_streams_finish{true};
-  uint64_t _time_last_segment_received{0};
-  uint64_t _time{0};
+    bool _linger_after_streams_finish{true};
+    uint64_t _time_last_segment_received{0};
+    uint64_t _time{0};
 
-  size_t _remaining_outbound_capacity{1};
-  bool _rst_received{false};
-  bool _rst_to_send{false};//rst needs to be sent
-  bool _inbound_ended{false};
-  bool _outbound_ackd{false};//outbound stream is ack'd
-    bool _connect_called{false};//connect() is called
-    bool _rst_sended{false}; //rst sent
+    size_t _remaining_outbound_capacity{1};
+    bool _rst_received{false};
+    bool _rst_to_send{false};  // rst needs to be sent
+    bool _inbound_ended{false};
+    bool _outbound_ackd{false};   // outbound stream is ack'd
+    bool _connect_called{false};  // connect() is called
+    bool _rst_sended{false};      // rst sent
 
   public:
     // transfer _sender segments to connection
