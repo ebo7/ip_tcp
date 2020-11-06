@@ -16,30 +16,13 @@ void Router::add_route(const uint32_t route_prefix,
          << " => " << (next_hop.has_value() ? next_hop->ip() : "(direct)") << " on interface " << interface_num << "\n";
     BST::Insert(_bst.root(), route_prefix, prefix_length, interface_num, next_hop);
     Node *curr = _bst.root();
-    for (int i = 31; i >= 0; i--) {
-        // go left
-        if ((route_prefix & (1 << i)) == 0) {
-            if (!curr->left) {
-                break;
-            } else {
-                curr = curr->left;
-            }
-        }
-        // go right
-        else {
-            if (!curr->right) {
-                break;
-            } else {
-                curr = curr->right;
-            }
-        }
-    }
 }
 
 //! \param[in] dgram The datagram to be routed
 void Router::route_one_datagram(InternetDatagram &dgram) {
     uint32_t ip = dgram.header().dst;
     Node *curr = _bst.root();
+    Node *recent_valid_parent =	_bst.root().left();
     for (int i = 31; i >= 0; i--) {
         // go left
         if ((ip & (1 << i)) == 0) {
