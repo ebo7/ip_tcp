@@ -43,7 +43,8 @@ class AsyncNetworkInterface : public NetworkInterface {
 struct Node {
     // member vars
     size_t num_interface{};
-    std::vector<std::optional<Address>> data{};
+    std::optional<Address> data{};
+    bool has_data = false;
     Node *left = nullptr;
     Node *right = nullptr;
 };
@@ -55,6 +56,7 @@ class BST {
 
   public:
     BST();
+    //! Inserts interface number and Address information for a given prefix and its length
     static void Insert(Node *, uint32_t, uint32_t, size_t, std::optional<Address>);
     Node *root() { return _root; };
 };
@@ -62,7 +64,7 @@ class BST {
 //! \brief A router that has multiple network interfaces and
 //! performs longest-prefix-match routing between them.
 class Router {
-    //! Rou
+    //! BST for Routing Table
     BST _bst{};
     //! The router's collection of network interfaces
     std::vector<AsyncNetworkInterface> _interfaces{};
