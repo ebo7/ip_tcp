@@ -14,8 +14,9 @@ Program Structure and Design of the Router:
 
 Implementation Challenges:
 [
-Didn't realize at first that only leaf nodes should store hop information and wondered how to backtrack in case an IP
-only partially matched with a longer prefix. But it turned out that all valid IPs should at a leaf node.
+Wasn't sure at first whether all nodes and not just leaf nodes should store hop information.
+Was on a wrong track and wondered how to get the most recent node with valid data in case the route prefix only
+partially matches with an ip down the tree.
 Had problem with pointers, dereferencing, implementing BST and returning root of BST.
 ]
 

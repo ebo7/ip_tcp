@@ -3,9 +3,10 @@
 
 #include "network_interface.hh"
 
+#include <iostream>
+#include <map>
 #include <optional>
 #include <queue>
-
 //! \brief A wrapper for NetworkInterface that makes the host-side
 //! interface asynchronous: instead of returning received datagrams
 //! immediately (from the `recv_frame` method), it stores them for
@@ -38,9 +39,31 @@ class AsyncNetworkInterface : public NetworkInterface {
     std::queue<InternetDatagram> &datagrams_out() { return _datagrams_out; }
 };
 
+//! TreeNode
+struct Node {
+    // member vars
+    size_t num_interface{};
+    std::vector<std::optional<Address>> data{};
+    Node *left = nullptr;
+    Node *right = nullptr;
+};
+
+//! Binary Search Tree
+class BST {
+  private:
+    Node *_root;
+
+  public:
+    BST();
+    static void Insert(Node *, uint32_t, uint32_t, size_t, std::optional<Address>);
+    Node *root() { return _root; };
+};
+
 //! \brief A router that has multiple network interfaces and
 //! performs longest-prefix-match routing between them.
 class Router {
+    //! Rou
+    BST _bst{};
     //! The router's collection of network interfaces
     std::vector<AsyncNetworkInterface> _interfaces{};
 
